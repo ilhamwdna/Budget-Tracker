@@ -1,0 +1,1017 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Budget Tracker">
+<meta name="theme-color" content="#ffffff">
+<title>Budget Tracker</title>
+<style>
+:root{--bg:#fff;--surface:#f5f5f7;--ink:#1d1d1f;--mute:#6e6e73;--faint:#86868b;--line:#d2d2d7;--soft:#e8e8ed;--track:#e3e3e8;--blue:#0071e3;--blue-text:#0058b0;--green-fill:#34c759;--green-text:#248a3d;--orange-fill:#ff9f0a;--orange-text:#b25000;--red-fill:#ff3b30;--red-text:#d70015;--sys:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Helvetica Neue',Helvetica,Arial,sans-serif}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.45 var(--sys);-webkit-font-smoothing:antialiased;padding:env(safe-area-inset-top) 0 0}
+h1,h2{font-family:var(--sys);font-weight:700;letter-spacing:-.03em;margin:0}
+h2{font-size:28px}
+button,input,select{font:inherit;color:inherit}
+input:focus-visible,button:focus-visible,select:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+[hidden]{display:none!important}
+#shell{display:block}
+#side{display:none}
+#content{max-width:1100px;margin:0 auto;padding:0 20px calc(88px + env(safe-area-inset-bottom))}
+#cards{display:none}
+#view-data{display:none}
+header{display:flex;justify-content:space-between;align-items:center;padding:18px 0 6px}
+header h1{font-size:17px;font-weight:600;letter-spacing:-.01em}
+.page-name{display:none}
+.link{border:0;background:none;color:var(--mute);font-size:14px;padding:6px 0;cursor:pointer}
+.link:hover{color:var(--ink)}
+.card{background:var(--surface);border-radius:20px;padding:20px 22px}
+.stack{display:flex;flex-direction:column;gap:18px}
+.lbl{display:block;font-size:13px;color:var(--mute);margin-bottom:6px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{padding:9px 16px;border:0;border-radius:980px;background:var(--surface);font-size:14px;cursor:pointer}
+.chip[aria-pressed=true]{background:var(--ink);color:#fff}
+.chip.rek{border-radius:12px}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);background:var(--track);border-radius:10px;padding:2px}
+.seg.dua{grid-template-columns:repeat(2,1fr)}
+.seg-btn{border:0;background:transparent;border-radius:8px;padding:9px 4px;font-size:13px;cursor:pointer}
+.seg-btn[aria-pressed=true]{background:#fff;font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.14)}
+.field{width:100%;padding:13px 14px;border:0;border-radius:12px;background:var(--surface);font-size:16px}
+.card .field,.card .chip:not([aria-pressed=true]),.card .total,.card .sm{background:#fff}
+.row2{display:flex;gap:12px}.row2>*{flex:1;min-width:0}
+input[type=date]{min-width:0;max-width:100%;display:block}
+@media (max-width:600px){.row-tr{flex-direction:column}}
+.amount{display:flex;align-items:baseline;gap:8px;border-bottom:1px solid var(--line);padding-bottom:6px}
+.amount:focus-within{border-bottom-color:var(--blue)}
+.amount span{font-size:18px;color:var(--faint)}
+.amount input{border:0;background:none;outline:0;width:100%;font-size:44px;font-weight:300;letter-spacing:-.03em;padding:0;font-variant-numeric:tabular-nums;caret-color:var(--blue)}
+.amount input::placeholder{color:#c7c7cc}
+.primary{width:100%;padding:14px;border:0;border-radius:980px;background:var(--blue);color:#fff;font-size:15px;font-weight:600;cursor:pointer}
+.primary:hover{opacity:.88}
+.primary:disabled{background:var(--line);color:var(--faint);cursor:default;opacity:1}
+.secondary{padding:10px 18px;border:0;border-radius:980px;background:var(--soft);font-size:14px;cursor:pointer}
+.note{font-size:13px;color:var(--mute);line-height:1.5}
+.total{font-size:13px;color:var(--mute);background:var(--surface);border-radius:12px;padding:12px 14px}
+.total strong{color:var(--ink);font-variant-numeric:tabular-nums}
+.kartu .v{font-size:30px;font-weight:600;letter-spacing:-.02em;margin-top:4px;font-variant-numeric:tabular-nums}
+.bar-atas{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.bar-atas .ctl{display:flex;gap:8px;align-items:center}
+.bar-atas select{width:auto}
+.tbl{padding:8px 18px;overflow-x:auto}
+.tbl table{width:100%;border-collapse:collapse}
+.tbl th{font-weight:500;color:var(--mute);text-align:left;padding:11px 10px;font-size:13px;border-bottom:1px solid rgba(0,0,0,.08);white-space:nowrap}
+.tbl td{padding:11px 10px;font-size:14px;border-bottom:1px solid rgba(0,0,0,.06)}
+.tbl .r{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.tbl.lebar th:first-child,.tbl.lebar td:first-child{position:sticky;left:0;background:var(--surface);z-index:1}
+.tbl tr.sub td{background:rgba(0,0,0,.035);font-weight:600}
+.tbl tr.sel td{background:rgba(0,0,0,.05)}
+.tbl td.ov{background:rgba(0,0,0,.06)}
+.badge{padding:3px 10px;border-radius:980px;font-size:12px;background:var(--soft);color:var(--mute);white-space:nowrap;align-self:flex-start}
+.badge.out{background:var(--soft);color:var(--mute)}.badge.in{background:#e9f7ee;color:#1b6e31}.badge.tab{background:#e8f1fd;color:var(--blue-text)}
+.split{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:16px;align-items:start}
+.editbtn{border:0;background:none;padding:2px 4px;font-size:13px;font-variant-numeric:tabular-nums;border-bottom:1px dashed #b8b8bd;cursor:pointer}
+.pos{color:var(--green-text)}.neg{color:var(--red-text)}.oranye{color:var(--orange-text)}.biru{color:var(--blue-text)}
+.tint-g{background:#e9f7ee}.tint-b{background:#e8f1fd}.tint-r{background:#fdeceb}.tint-o{background:#fff3e0}
+.tint-g .note{color:#1b6e31}.tint-b .note{color:var(--blue-text)}.tint-r .note{color:#b80012}.tint-o .note{color:#9a4a00}
+.tint-b .bar{background:rgba(0,113,227,.16)}
+.komposisi{display:flex;height:12px;border-radius:6px;overflow:hidden;gap:2px;margin:12px 0}
+.komposisi i{display:block;min-width:4px}
+.lgd{display:flex;justify-content:space-between;gap:10px;font-size:13px;padding:3px 0}
+.lgd .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:8px}
+.lgd em{font-style:normal;color:var(--faint);margin-left:6px}
+.tujuan-kartu{background:var(--tt)}
+.tujuan-kartu .note{color:var(--mute)}
+.tujuan-kartu .bar{background:var(--tt2)}
+.tujuan-kartu .bar i{background:var(--tc)}
+.tujuan-kartu .pct{color:var(--td)}
+.tujuan-body{display:flex;gap:14px;align-items:flex-start}
+.tujuan-info{flex:1;min-width:0}
+.tujuan-rinc{flex:none;width:72px;max-width:72px;text-align:center;overflow:hidden}
+.tujuan-rinc .ket{margin-top:6px;display:flex;flex-direction:column;gap:3px;align-items:flex-start;text-align:left;width:100%}
+.tujuan-rinc .ket span{font-size:10px;line-height:1.3;color:var(--faint);display:flex;gap:4px;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tujuan-rinc .ket .dot{flex:none;margin-top:3px}
+.tujuan-rinc .dot{width:6px;height:6px;border-radius:50%}
+.badge .dot,.tbl th .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px}
+.sm{padding:8px 14px;border:0;border-radius:980px;background:var(--surface);font-size:14px}
+.big{font-size:34px;font-weight:700;letter-spacing:-.03em;margin-top:2px;font-variant-numeric:tabular-nums}
+.item{padding:12px 0;border-bottom:1px solid var(--soft)}
+.item .top{display:flex;justify-content:space-between;gap:8px;font-weight:500}
+.item .top span:last-child{font-weight:600;font-variant-numeric:tabular-nums}
+.item .sub{font-size:13px;color:var(--faint);margin-top:2px}
+.bar{height:4px;border-radius:2px;background:var(--track);margin-top:9px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--green-fill);border-radius:2px}
+.bar.biru i{background:var(--blue)}
+.hati .bar i{background:var(--orange-fill)}.hati .top span:last-child{color:var(--orange-text)}
+.warn .bar i{background:var(--red-fill)}.warn .top span:last-child{color:var(--red-text)}
+.err{color:var(--red-text);font-size:14px;font-weight:600}
+nav{position:fixed;left:0;right:0;bottom:0;display:flex;background:rgba(255,255,255,.92);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);border-top:.5px solid var(--line);padding:8px 0 calc(8px + env(safe-area-inset-bottom))}
+nav button{flex:1;border:0;background:none;padding:4px 0;font-size:10px;color:var(--faint);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px}
+nav button[aria-current=true]{color:var(--blue);font-weight:600}
+#toast{position:fixed;left:16px;right:16px;bottom:calc(84px + env(safe-area-inset-bottom));max-width:440px;margin:0 auto;background:var(--ink);color:#fff;padding:12px 16px;border-radius:14px;text-align:center;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s}
+#toast.show{opacity:1}#toast.bad{background:var(--red-text)}
+main{padding-top:8px}
+@media (min-width:900px){
+  #shell{display:grid;grid-template-columns:220px 1fr;min-height:100vh}
+  #side{display:flex;flex-direction:column;gap:2px;background:#fff;border-right:1px solid var(--soft);padding:26px 14px}
+  #side .brand{font-size:15px;font-weight:600;letter-spacing:-.01em;padding:0 12px 22px}
+  #side button{text-align:left;border:0;background:none;padding:9px 12px;border-radius:10px;font-size:14px;color:var(--mute);cursor:pointer}
+  #side button[aria-current=true]{background:var(--surface);color:var(--ink);font-weight:600}
+  #side button.push{margin-top:auto}
+  #content{max-width:none;width:100%;padding:0 38px 34px}
+  header{padding:30px 0 10px}
+  header h1{font-size:34px;font-weight:700;letter-spacing:-.03em}
+  .app-name{display:none}
+  .page-name{display:inline}
+  main{display:grid;grid-template-columns:minmax(0,1fr) 440px;gap:28px;align-items:start}
+  #view-sisa,#view-data{order:1}
+  #view-catat{order:2}
+  #view-catat{background:var(--surface);border-radius:20px;padding:22px}
+  #view-catat .field,#view-catat .chip:not([aria-pressed=true]),#view-catat .total{background:#fff}
+  #cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;grid-column:1/-1}
+  .view[hidden]{display:flex!important}
+  nav{display:none!important}
+  #toast{bottom:24px}
+  body.pg-datacatat #view-data{display:flex}
+  body.pg-datacatat #view-sisa,body.pg-datacatat #cards{display:none!important}
+  body.pg-dataonly main{grid-template-columns:minmax(0,1fr)}
+  body.pg-dataonly #view-data{display:flex}
+  body.pg-dataonly #view-catat,body.pg-dataonly #view-sisa,body.pg-dataonly #cards{display:none!important}
+}
+</style>
+</head>
+<body>
+<div id="shell">
+  <aside id="side" aria-label="Menu utama"></aside>
+  <div id="content">
+    <header><h1><span class="app-name">Budget Tracker</span><span class="page-name" id="judul">Ringkasan Bulanan</span></h1><button class="link" id="btnKoneksi" type="button">Koneksi</button></header>
+
+    <section id="setup" class="card stack" hidden></section>
+
+    <main id="main" hidden>
+      <section id="cards"></section>
+      <section id="view-catat" class="view stack"></section>
+      <section id="view-sisa" class="view stack" hidden></section>
+      <section id="view-data" class="stack"></section>
+    </main>
+
+    <nav id="nav" hidden>
+      <button type="button" data-v="catat" aria-current="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>Catat</button>
+      <button type="button" data-v="sisa"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M5 20V11M12 20V5M19 20v-6"/></svg>Sisa</button>
+    </nav>
+    <div id="toast" role="status"></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var KEY = 'bt_cfg_v1';
+  var $ = function (s) { return document.querySelector(s); };
+
+  function h(tag, props) {
+    var e = document.createElement(tag);
+    props = props || {};
+    Object.keys(props).forEach(function (k) {
+      var v = props[k];
+      if (v === false || v == null) return;
+      if (k === 'class') e.className = v;
+      else if (k === 'text') e.textContent = v;
+      else if (k === 'value') e.value = v;
+      else if (k.indexOf('on') === 0) e.addEventListener(k.slice(2), v);
+      else if (v === true) e.setAttribute(k, '');
+      else e.setAttribute(k, v);
+    });
+    for (var i = 2; i < arguments.length; i++) {
+      [].concat(arguments[i]).forEach(function (c) {
+        if (c == null || c === false) return;
+        e.append(c && c.nodeType ? c : document.createTextNode(String(c)));
+      });
+    }
+    return e;
+  }
+
+  var rp = function (n) { return (n < 0 ? '-Rp' : 'Rp') + Math.abs(Math.round(n)).toLocaleString('id-ID'); };
+  var digits = function (s) { return String(s || '').replace(/\D/g, ''); };
+  var fmt = function (s) { var d = digits(s); return d ? Number(d).toLocaleString('id-ID') : ''; };
+  function today() {
+    var d = new Date(), p = function (n) { return String(n).padStart(2, '0'); };
+    return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate());
+  }
+  var toastTimer;
+  function toast(msg, bad) {
+    var t = $('#toast'); t.textContent = msg; t.className = 'show' + (bad ? ' bad' : '');
+    clearTimeout(toastTimer); toastTimer = setTimeout(function () { t.className = ''; }, bad ? 5000 : 2500);
+  }
+
+  // ---------- konfigurasi & API ----------
+  function loadCfg() { try { return JSON.parse(localStorage.getItem(KEY)) || null; } catch (e) { return null; } }
+  function saveCfg(c) { try { localStorage.setItem(KEY, JSON.stringify(c)); } catch (e) {} }
+  var cfg = loadCfg();
+  var data = null;
+  var view = 'catat';
+  var BULAN = null;                       // bulan terpilih (dipakai bersama oleh Sisa, Transaksi, Budget)
+  function bulanAktif() { return BULAN || (data && data.bulanIni) || 1; }
+
+  function apiGet(params) {
+    var u = new URL(cfg.url);
+    Object.keys(params).forEach(function (k) { u.searchParams.set(k, params[k]); });
+    u.searchParams.set('token', cfg.token);
+    return fetch(u.toString()).then(function (r) { return r.json(); });
+  }
+  function apiPost(body) {
+    body.token = cfg.token;
+    return fetch(cfg.url, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) })
+      .then(function (r) { return r.json(); });
+  }
+
+  // ---------- setup koneksi ----------
+  function showSetup(pesan) {
+    $('#main').hidden = true; $('#nav').hidden = true;
+    var box = $('#setup'); box.hidden = false; box.textContent = '';
+    var url = h('input', { class: 'field', id: 'inUrl', type: 'url', placeholder: 'https://script.google.com/macros/s/.../exec', value: (cfg && cfg.url) || '', autocomplete: 'off' });
+    var tok = h('input', { class: 'field', id: 'inTok', type: 'password', placeholder: 'Token', value: (cfg && cfg.token) || '', autocomplete: 'off' });
+    var msg = h('div', { class: 'err', id: 'setupMsg', text: pesan || '' });
+    var btn = h('button', { class: 'primary', type: 'button', text: 'Simpan & uji koneksi', onclick: function () {
+      var u = url.value.trim(), t = tok.value.trim();
+      if (!u || !t) { msg.textContent = 'URL dan token wajib diisi.'; return; }
+      cfg = { url: u, token: t }; saveCfg(cfg); msg.textContent = 'Menguji...'; boot();
+    } });
+    box.append(
+      h('h2', { text: 'Koneksi ke sheet' }),
+      h('p', { class: 'note', text: 'Isi URL Web App (berakhiran /exec) dan token. Keduanya hanya disimpan di perangkat ini, tidak ada di file aplikasi. Di iPhone, aplikasi yang ditambahkan ke Layar Utama menyimpan data terpisah dari Safari, jadi isi ulang sekali di sana.' }),
+      h('div', {}, h('label', { class: 'lbl', for: 'inUrl', text: 'URL Web App' }), url),
+      h('div', {}, h('label', { class: 'lbl', for: 'inTok', text: 'Token' }), tok),
+      btn, msg
+    );
+  }
+
+  // ---------- state form catat ----------
+  var f = { jenis: 'Pengeluaran', kategori: null, rekening: null, nominal: '', deskripsi: '', tanggal: today(),
+            sJenis: 'Beli', kode: null, lembar: '', harga: '', biaya: '', saham: false, sending: false };
+  var JENIS = ['Pengeluaran', 'Pemasukan', 'Tabungan & Investasi'];
+
+  function rekEfektif() { return f.rekening || (data.rekeningDefault && data.rekeningDefault[f.jenis]) || null; }
+  function adalahSaham() { return f.jenis === 'Tabungan & Investasi' && f.saham; }
+
+  // teks putih di atas warna gelap, teks gelap di atas warna terang (agar tetap terbaca)
+  function teksDiAtas(hex) {
+    var v = [1, 3, 5].map(function (i) { var c = parseInt(hex.slice(i, i + 2), 16) / 255; return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); });
+    var lum = 0.2126 * v[0] + 0.7152 * v[1] + 0.0722 * v[2];
+    return 1.05 / (lum + 0.05) >= 3 ? '#fff' : '#1d1d1f';
+  }
+  // rekening memakai warna jenis aset yang sama ("Mandiri" -> "Bank Mandiri", "BCA" -> "Bank BCA")
+  function warnaRekening(nama) { return PALET['Bank ' + nama] || PALET[nama] || warnaJenisAset(nama); }
+  function chipGroup(items, aktif, onPick, extra, warnaFn) {
+    return h('div', { class: 'chips' }, items.map(function (it) {
+      var w = warnaFn && it === aktif ? warnaFn(it) : null;
+      return h('button', { type: 'button', class: 'chip ' + (extra || ''), 'aria-pressed': String(it === aktif), text: it,
+        style: w ? 'background:' + w + ';color:' + teksDiAtas(w) : null, onclick: function () { onPick(it); } });
+    }));
+  }
+
+  var JUDUL_JENIS = { 'Pengeluaran': 'Pengeluaran', 'Pemasukan': 'Pemasukan', 'Tabungan & Investasi': 'Tabungan' };
+  function segmen(items, aktif, onPick) {
+    return h('div', { class: 'seg', role: 'group', 'aria-label': 'Jenis transaksi' }, items.map(function (it) {
+      return h('button', { type: 'button', class: 'seg-btn', 'aria-pressed': String(it === aktif), 'aria-label': it, text: JUDUL_JENIS[it] || it, onclick: function () { onPick(it); } });
+    }));
+  }
+
+  function renderCatat() {
+    var root = $('#view-catat'); root.textContent = '';
+    var daftarKat = data.kategori[f.jenis] || [];
+    if (daftarKat.indexOf(f.kategori) < 0) f.kategori = null;   // kategori awal dikosongkan, dipilih manual
+
+    var tujuanSaham = (data.tujuanSaham || '').trim();
+    var tujuanSahamValid = tujuanSaham && (data.kategoriSemua['Tabungan & Investasi'] || []).some(function (k) { return k.nama === tujuanSaham; });
+    var kategoriBlok = h('div', {}, h('label', { class: 'lbl', for: 'selKat', text: 'Kategori' }),
+      h('select', { class: 'field', id: 'selKat', onchange: function (e) { f.kategori = e.target.value || null; renderCatat(); } },
+        [h('option', { value: '', text: 'Pilih kategori' })].concat(daftarKat.map(function (k) { return h('option', { value: k, text: k, selected: k === f.kategori }); }))));
+    var infoSaham = h('div', { class: 'note', id: 'infoKategoriSaham', text: tujuanSahamValid
+      ? 'Pembelian saham dicatat sebagai setoran ke ' + tujuanSaham + ' (tujuan untuk saham).'
+      : 'Tujuan untuk saham belum dipilih. Pilih di Setelan, tab Tujuan aset. Tujuan itu harus juga menjadi kategori Tabungan & Investasi.' });
+
+    root.append(
+      h('h2', { text: 'Catat transaksi' }),
+      segmen(JENIS, f.jenis, function (j) { f.jenis = j; f.kategori = null; f.rekening = null; f.saham = false; renderCatat(); }),
+      f.jenis === 'Tabungan & Investasi'
+        ? h('div', { class: 'seg dua', role: 'group', 'aria-label': 'Jenis pencatatan tabungan' }, ['Setoran', 'Saham'].map(function (t) {
+            return h('button', { type: 'button', class: 'seg-btn', 'aria-pressed': String((t === 'Saham') === f.saham), text: t, onclick: function () { f.saham = t === 'Saham'; renderCatat(); } });
+          }))
+        : null,
+      adalahSaham() ? infoSaham : kategoriBlok
+    );
+
+    var rek = rekEfektif();
+    var rekNama = data.rekening.map(function (r) { return r.nama; });
+    var rekBlok = h('div', {},
+      h('div', { class: 'lbl', text: f.jenis === 'Tabungan & Investasi' ? 'Rekening asal dana' : 'Rekening' }),
+      chipGroup(rekNama, rek, function (r) { f.rekening = r; renderCatat(); }, 'rek', warnaRekening),
+      h('div', { class: 'note', style: 'margin-top:6px', text: (data.rekeningDefault[f.jenis]
+          ? (rek === data.rekeningDefault[f.jenis] ? 'Default ' + rek + ', ketuk untuk ganti' : 'Diganti dari default ' + data.rekeningDefault[f.jenis])
+          : 'Pilih rekening') }));
+
+    var tgl = h('div', {}, h('label', { class: 'lbl', for: 'inTgl', text: 'Tanggal' }),
+      h('input', { class: 'field', id: 'inTgl', type: 'date', value: f.tanggal, oninput: function (e) { f.tanggal = e.target.value; } }));
+
+    if (adalahSaham()) renderSaham(root, rekBlok, tgl); else renderUmum(root, rekBlok, tgl);
+  }
+
+  function renderUmum(root, rekBlok, tgl) {
+    var btn = h('button', { class: 'primary', type: 'button', text: 'Simpan transaksi', disabled: f.sending, onclick: submitUmum });
+    root.append(
+      h('div', {}, h('label', { class: 'lbl', for: 'inNom', text: 'Nominal' }),
+        h('div', { class: 'amount' }, h('span', { text: 'Rp' }),
+          h('input', { id: 'inNom', type: 'text', inputmode: 'numeric', placeholder: '0', value: f.nominal, autocomplete: 'off',
+            oninput: function (e) { f.nominal = fmt(e.target.value); e.target.value = f.nominal; } }))),
+      h('div', {}, h('label', { class: 'lbl', for: 'inDes', text: 'Deskripsi' }),
+        h('input', { class: 'field', id: 'inDes', type: 'text', value: f.deskripsi, maxlength: '200', oninput: function (e) { f.deskripsi = e.target.value; } })),
+      h('div', { class: 'row2 row-tr' }, tgl, rekBlok),
+      h('div', { class: 'err', id: 'catatMsg' }), btn
+    );
+  }
+
+  function renderSaham(root, rekBlok, tgl) {
+    if (!f.kode || data.emiten.indexOf(f.kode) < 0) f.kode = data.emiten[0] || null;
+    var total = h('div', { class: 'total', id: 'sahamTotal' });
+    function hitung() {
+      var l = Number(digits(f.lembar)), hg = Number(digits(f.harga)), b = Number(digits(f.biaya));
+      var n = f.sJenis === 'Beli' ? l * hg + b : l * hg - b;
+      total.textContent = ''; total.append('Nilai transaksi: ', h('strong', { text: rp(n || 0) }), ' — otomatis tercatat di Transaksi & Saham');
+    }
+    function angka(id, label, key, ph) {
+      return h('div', {}, h('label', { class: 'lbl', for: id, text: label }),
+        h('input', { class: 'field', id: id, type: 'text', inputmode: 'numeric', placeholder: ph || '', value: f[key], autocomplete: 'off',
+          oninput: function (e) { f[key] = fmt(e.target.value); e.target.value = f[key]; hitung(); } }));
+    }
+    var kodeSel = h('select', { class: 'field', id: 'selKode', onchange: function (e) { f.kode = e.target.value; } },
+      data.emiten.map(function (k) { return h('option', { value: k, text: k, selected: k === f.kode }); }));
+    var btn = h('button', { class: 'primary', type: 'button', text: 'Simpan transaksi saham', disabled: f.sending, onclick: submitSaham });
+    root.append(
+      h('div', {}, h('label', { class: 'lbl', for: 'selKode', text: 'Kode saham' }), kodeSel),
+      h('div', {}, h('div', { class: 'lbl', text: 'Jenis transaksi saham' }), chipGroup(['Beli', 'Jual'], f.sJenis, function (j) { f.sJenis = j; renderCatat(); })),
+      h('div', { class: 'row2' }, angka('inLem', 'Lembar', 'lembar'), angka('inHar', 'Harga/lembar', 'harga')),
+      angka('inBia', 'Biaya (opsional)', 'biaya', '0'),
+      h('div', { class: 'row2 row-tr' }, tgl, rekBlok),
+      total, h('div', { class: 'err', id: 'catatMsg' }), btn
+    );
+    hitung();
+  }
+
+  function setMsg(t) { var m = $('#catatMsg'); if (m) m.textContent = t || ''; }
+
+  function kirim(body, sukses) {
+    f.sending = true; renderCatat();
+    return apiPost(body).then(function (r) {
+      f.sending = false;
+      if (r && r.ok) { sukses(r); } else { renderCatat(); setMsg((r && r.error) || 'Gagal menyimpan.'); toast((r && r.error) || 'Gagal menyimpan.', true); }
+    }).catch(function () {
+      f.sending = false; renderCatat();
+      var m = 'Tidak bisa memastikan apakah tersimpan. Cek sheet dulu sebelum mengulang, supaya tidak tercatat dua kali.';
+      setMsg(m); toast(m, true);
+    });
+  }
+
+  function submitUmum() {
+    if (f.sending) return;
+    var nilai = Number(digits(f.nominal)), rek = rekEfektif();
+    if (!(nilai > 0)) return setMsg('Isi nominal dulu.');
+    if (!f.kategori) return setMsg('Pilih kategori.');
+    if (!rek) return setMsg('Pilih rekening.');
+    if (!f.tanggal) return setMsg('Isi tanggal.');
+    kirim({ action: 'catat', tanggal: f.tanggal, jenis: f.jenis, kategori: f.kategori, deskripsi: f.deskripsi, nilai: nilai, rekening: rek }, function () {
+      f.nominal = ''; f.deskripsi = ''; renderCatat(); toast('Tersimpan'); loadSisa();
+    });
+  }
+
+  function submitSaham() {
+    if (f.sending) return;
+    var l = Number(digits(f.lembar)), hg = Number(digits(f.harga)), b = Number(digits(f.biaya)), rek = rekEfektif();
+    if (!f.kode) return setMsg('Belum ada kode saham di Portofolio.');
+    if (f.sJenis === 'Beli' && !(data.tujuanSaham || '').trim()) return setMsg('Pilih dulu tujuan untuk saham di Setelan, tab Tujuan aset.');
+    if (!(l > 0)) return setMsg('Isi jumlah lembar.');
+    if (!(hg > 0)) return setMsg('Isi harga per lembar.');
+    if (!rek) return setMsg('Pilih rekening asal.');
+    if (!f.tanggal) return setMsg('Isi tanggal.');
+    kirim({ action: 'catatSaham', tanggal: f.tanggal, kode: f.kode, jenis: f.sJenis, lembar: l, harga: hg, biaya: b, rekening: rek }, function (r) {
+      f.lembar = ''; f.harga = ''; f.biaya = ''; renderCatat(); toast('Tersimpan: ' + rp(r.nilaiTransaksi)); loadSisa();
+    });
+  }
+
+  // ---------- sisa ----------
+  var S = { bulan: null, res: null, loading: false, error: '' };
+
+  function loadSisa() {
+    S.bulan = bulanAktif();
+    S.loading = true; S.error = ''; renderSisa();
+    return apiGet({ action: 'sisa', bulan: S.bulan }).then(function (r) {
+      S.loading = false;
+      if (r && r.ok) S.res = r; else S.error = (r && r.error) || 'Gagal memuat.';
+      renderSisa();
+    }).catch(function () { S.loading = false; S.error = 'Tidak bisa terhubung.'; renderSisa(); });
+  }
+
+  function renderCards() {
+    var box = $('#cards'); box.textContent = '';
+    var r = S.res; if (!r) return;
+    function kartu(judul, nilai, ket, kelas) {
+      return h('div', { class: 'card kartu ' + (kelas || '') }, h('div', { class: 'note', text: judul }), h('div', { class: 'v', text: nilai }), h('div', { class: 'note', text: ket }));
+    }
+    box.append(
+      kartu('Pemasukan', rp(r.arusKas.pemasukan), r.label, 'tint-g'),
+      kartu('Pengeluaran', rp(r.total.realisasi), 'dari budget ' + rp(r.total.budget)),
+      kartu('Tabungan & Investasi', rp(r.arusKas.tabungan), r.label, 'tint-b')
+    );
+  }
+
+  function renderSisa() {
+    renderCards();
+    var root = $('#view-sisa'); root.textContent = '';
+    var pilih = h('select', { class: 'field', 'aria-label': 'Pilih bulan', style: 'max-width:260px', onchange: function (e) { setBulan(Number(e.target.value)); } },
+      data.bulan.map(function (b) { return h('option', { value: b.no, text: b.label, selected: b.no === S.bulan }); }));
+    root.append(h('div', { style: 'display:flex;justify-content:space-between;align-items:center;gap:12px' }, h('h2', { text: 'Sisa anggaran' }), pilih));
+    if (data.bulanIni === null) root.append(h('div', { class: 'note', text: 'Periode anggaran belum dimulai (mulai ' + data.bulan[0].label + ').' }));
+    if (S.error) root.append(h('div', { class: 'err', text: S.error }));
+    if (S.loading && !S.res) { root.append(h('div', { class: 'note', text: 'Memuat...' })); return; }
+    var r = S.res; if (!r) return;
+
+    root.append(
+      h('div', { class: 'card' }, h('div', { class: 'note', text: 'Sisa total pengeluaran' }), h('div', { class: 'big', text: rp(r.total.sisa) }),
+        h('div', { class: 'note', text: rp(r.total.realisasi) + ' dari ' + rp(r.total.budget) })),
+      h('div', { class: 'card' }, h('div', { class: 'note', text: 'Uang belum teralokasi' }),
+        h('div', { class: 'big', style: 'font-size:24px', text: rp(r.arusKas.belumTeralokasi) }),
+        h('div', { class: 'note', text: 'Pemasukan ' + rp(r.arusKas.pemasukan) + ' − pengeluaran ' + rp(r.arusKas.pengeluaran) + ' − tabungan ' + rp(r.arusKas.tabungan) }))
+    );
+    var daftar = h('div', { class: 'daftar-sisa' });
+    r.kategori.filter(function (k) { return k.budget > 0 || k.realisasi > 0; }).forEach(function (k) {
+      var pct = k.budget > 0 ? Math.min(100, Math.round(k.realisasi / k.budget * 100)) : 100;
+      var lewat = k.sisa < 0 || (k.budget === 0 && k.realisasi > 0);   // merah
+      var hati = !lewat && k.budget > 0 && pct >= 80;                     // oranye: hampir habis
+      var label = k.budget === 0 ? 'tanpa budget' : (k.sisa < 0 ? 'lewat ' + rp(-k.sisa) : rp(k.sisa) + ' sisa');
+      daftar.append(h('div', { class: 'item' + (lewat ? ' warn' : (hati ? ' hati' : '')) },
+        h('div', { class: 'top' }, h('span', { text: k.nama }), h('span', { text: label })),
+        h('div', { class: 'sub', text: rp(k.realisasi) + ' dari ' + rp(k.budget) }),
+        h('div', { class: 'bar' }, h('i', { style: 'width:' + pct + '%' }))));
+    });
+    root.append(daftar);
+    root.append(h('button', { class: 'secondary', type: 'button', text: 'Muat ulang', onclick: function () { loadSisa(); } }));
+  }
+
+  // ---------- helper halaman data ----------
+  function svgEl(tag, attrs) {
+    var e = document.createElementNS('http://www.w3.org/2000/svg', tag);
+    Object.keys(attrs || {}).forEach(function (k) { e.setAttribute(k, attrs[k]); });
+    for (var i = 2; i < arguments.length; i++) if (arguments[i]) e.append(arguments[i]);
+    return e;
+  }
+  function monthSelect() {
+    return h('select', { class: 'sm', 'aria-label': 'Pilih bulan', onchange: function (e) { setBulan(Number(e.target.value)); } },
+      data.bulan.map(function (b) { return h('option', { value: b.no, text: b.label, selected: b.no === bulanAktif() }); }));
+  }
+  function barAtas(judul, ctl) {
+    // judul halaman sudah ada di header, jadi di sini hanya kontrol (bulan, filter) bila ada
+    if (!ctl || !ctl.length) return document.createDocumentFragment();
+    return h('div', { class: 'bar-atas', style: 'justify-content:flex-end' }, h('div', { class: 'ctl' }, ctl));
+  }
+  function tabel(kolom, baris, opsi) {
+    opsi = opsi || {};
+    return h('div', { class: 'card tbl ' + (opsi.kelasTabel || '') }, h('table', {},
+      h('thead', {}, h('tr', {}, kolom.map(function (c) { return h('th', { class: c.r ? 'r' : '' }, c.dot ? h('i', { class: 'dot', style: 'background:' + c.dot }) : null, c.t); }))),
+      h('tbody', {}, baris.map(function (row) {
+        return h('tr', { class: opsi.kelas ? opsi.kelas(row) : '' }, kolom.map(function (c) {
+          return h('td', { class: (c.r ? 'r ' : '') + (c.kelas ? c.kelas(row) : '') }, c.f(row));
+        }));
+      }))));
+  }
+  function badge(j) { return h('span', { class: 'badge ' + (j === 'Pengeluaran' ? 'out' : j === 'Pemasukan' ? 'in' : 'tab'), text: j }); }
+  function angkaOr(x, fmtFn) { return (typeof x === 'number' && x !== 0) ? (fmtFn || rp)(x) : (typeof x === 'string' && x ? x : '–'); }
+  function pct(x) { return typeof x === 'number' ? (x >= 0 ? '+' : '') + (x * 100).toFixed(1).replace('.', ',') + '%' : ''; }
+  function muat(state, param, render) {
+    state.loading = true; state.err = ''; render();
+    return apiGet(param).then(function (r) {
+      state.loading = false;
+      if (r && r.ok) state.res = r; else state.err = (r && r.error) || 'Gagal memuat.';
+      render();
+    }).catch(function () { state.loading = false; state.err = 'Tidak bisa terhubung.'; render(); });
+  }
+  function kirimData(body, sukses, gagal) {
+    return apiPost(body).then(function (r) {
+      if (r && r.ok) sukses(r); else gagal((r && r.error) || 'Gagal menyimpan.');
+    }).catch(function () { gagal('Tidak bisa memastikan apakah tersimpan. Cek sheet dulu sebelum mengulang.'); });
+  }
+  function panelPesan(t, ok) { return t ? h('div', { class: ok ? 'note pos' : 'err', text: t }) : null; }
+
+  // ---------- Transaksi ----------
+  var TR = { res: null, loading: false, err: '', jenis: '' };
+  function loadTransaksi() { return muat(TR, { action: 'transaksi', bulan: bulanAktif() }, renderTransaksi); }
+  function renderTransaksi() {
+    var root = $('#view-data'); root.textContent = '';
+    var filter = h('select', { class: 'sm', 'aria-label': 'Filter jenis', onchange: function (e) { TR.jenis = e.target.value; renderTransaksi(); } },
+      [h('option', { value: '', text: 'Semua jenis' })].concat(JENIS.map(function (j) { return h('option', { value: j, text: j, selected: j === TR.jenis }); })));
+    root.append(barAtas('Transaksi', [monthSelect(), filter]));
+    if (TR.err) root.append(h('div', { class: 'err', text: TR.err }));
+    if (TR.loading && !TR.res) { root.append(h('div', { class: 'note', text: 'Memuat...' })); return; }
+    var rows = ((TR.res && TR.res.baris) || []).filter(function (x) { return !TR.jenis || x.jenis === TR.jenis; });
+    if (!rows.length) { root.append(h('div', { class: 'card note', text: 'Belum ada transaksi untuk pilihan ini.' })); return; }
+    root.append(tabel([
+      { t: 'Tanggal', f: function (x) { return x.tanggal; } },
+      { t: 'Jenis', f: function (x) { return badge(x.jenis); } },
+      { t: 'Kategori', f: function (x) { return x.kategori; } },
+      { t: 'Deskripsi', f: function (x) { return x.deskripsi; } },
+      { t: 'Nilai', r: true, kelas: function (x) { return x.jenis === 'Pemasukan' ? 'pos' : (x.jenis === 'Tabungan & Investasi' ? 'biru' : ''); },
+        f: function (x) { return (x.jenis === 'Pemasukan' ? '+' : (x.jenis === 'Pengeluaran' ? '\u2212' : '')) + rp(x.nilai); } },
+      { t: 'Rekening', f: function (x) { return x.rekening; } }
+    ], rows), h('div', { class: 'note', text: rows.length + ' transaksi. Untuk menambah, gunakan form di sebelah kanan. Koreksi atau hapus dilakukan langsung di sheet.' }));
+  }
+
+  // ---------- Budget ----------
+  var BG = { res: null, loading: false, err: '', edit: null, draft: '', msg: '', ok: true };
+  function loadBudget() { return muat(BG, { action: 'budget', bulan: bulanAktif() }, renderBudget); }
+  function renderBudget() {
+    var root = $('#view-data'); root.textContent = '';
+    root.append(barAtas('Budget', [monthSelect()]));
+    if (BG.err) root.append(h('div', { class: 'err', text: BG.err }));
+    if (BG.loading && !BG.res) { root.append(h('div', { class: 'note', text: 'Memuat...' })); return; }
+    if (!BG.res) return;
+    var rows = BG.res.baris, label = BG.res.label;
+    var tbl = tabel([
+      { t: 'Jenis', f: function (x) { return x.jenis; } },
+      { t: 'Kategori', f: function (x) { return x.kategori; } },
+      { t: 'Default bulanan', r: true, f: function (x) {
+        return x.isSub ? rp(x.default) : h('button', { type: 'button', class: 'editbtn', text: angkaOr(x.default), onclick: function () { mulaiEdit(x, 'default'); } }); } },
+      { t: label, r: true, kelas: function (x) { return x.override ? 'ov' : ''; }, f: function (x) {
+        return x.isSub ? rp(x.nilai) : [x.override ? h('span', { class: 'oranye', style: 'font-size:11px;margin-right:4px', text: '●' }) : null,
+          h('button', { type: 'button', class: 'editbtn', text: angkaOr(x.nilai), onclick: function () { mulaiEdit(x, 'bulan'); } })]; } }
+    ], rows, { kelas: function (x) { return x.isSub ? 'sub' : (BG.edit && BG.edit.row === x.row ? 'sel' : ''); } });
+    root.append(blokBelumDianggarkan(rows, label),
+      h('div', { class: 'note', text: 'Ketuk angka untuk mengubahnya. Titik ● = bulan ini berbeda dari default.' }),
+      h('div', { class: 'split' }, tbl, panelBudget(label)));
+  }
+  // Pemasukan dikurangi Pengeluaran dan Tabungan, dari subtotal (bukan dihitung ulang dari data sheet lain),
+  // supaya selalu konsisten dengan angka yang tampil di tabel Budget di atasnya. Dihitung untuk Default dan
+  // untuk bulan yang sedang dipilih.
+  function blokBelumDianggarkan(rows, label) {
+    var subDef = {}, subBul = {}, lastJenis = '';
+    rows.forEach(function (x) {
+      if (!x.isSub) { lastJenis = x.jenis; return; }
+      subDef[lastJenis] = x.default; subBul[lastJenis] = x.nilai;
+    });
+    var ambil = function (o) { return (o['Pemasukan'] || 0) - (o['Pengeluaran'] || 0) - (o['Tabungan & Investasi'] || 0); };
+    var uDef = ambil(subDef), uBul = ambil(subBul);
+    function baris(judul, nilai) {
+      var teks, kelas;
+      if (nilai > 0) { teks = 'Belum dianggarkan ke pengeluaran atau tabungan. Kalau tidak dibelanjakan, ini jadi tabungan yang tidak tercatat; kalau dibelanjakan tanpa dicatat, jadi pengeluaran yang tidak tercatat.'; kelas = 'oranye'; }
+      else if (nilai < 0) { teks = 'Anggaran pengeluaran dan tabungan melebihi pemasukan.'; kelas = 'neg'; }
+      else { teks = 'Semua pemasukan sudah dianggarkan.'; kelas = 'pos'; }
+      return h('div', {}, h('div', { class: 'note', text: judul }),
+        h('div', { style: "font-size:22px;font-weight:600;letter-spacing:-.01em;margin-top:2px;font-variant-numeric:tabular-nums", class: kelas, text: (nilai < 0 ? '-' : '') + rp(Math.abs(nilai)) }),
+        h('div', { class: 'note', style: 'margin-top:4px', text: teks }));
+    }
+    return h('div', { class: 'card', id: 'blokBelumDianggarkan', style: 'display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px' },
+      baris('Belum dianggarkan \u00b7 Default bulanan', uDef), baris('Belum dianggarkan \u00b7 ' + label, uBul));
+  }
+  function mulaiEdit(x, mode) { BG.edit = { row: x.row, jenis: x.jenis, kategori: x.kategori, mode: mode, override: x.override, def: x.default, nilai: x.nilai }; BG.draft = fmt(String(mode === 'default' ? x.default : x.nilai)); BG.msg = ''; renderBudget(); }
+  function panelBudget(label) {
+    var e = BG.edit;
+    var box = h('div', { class: 'card stack', style: 'gap:12px' });
+    if (!e) { box.append(h('div', { style: 'font-weight:700', text: 'Ubah budget' }), h('div', { class: 'note', text: 'Ketuk angka di kolom Default untuk mengubah default kategori (memengaruhi semua bulan yang belum diubah), atau angka di kolom bulan untuk mengubah bulan ini saja.' }), panelPesan(BG.msg, BG.ok)); return box; }
+    var lama = e.mode === 'default' ? e.def : e.nilai;
+    var diff = h('div', { class: 'total' });
+    function hitung() { diff.textContent = rp(lama) + '  →  ' + rp(Number(digits(BG.draft))); }
+    var inp = h('input', { class: 'field', type: 'text', inputmode: 'numeric', 'aria-label': 'Nominal budget', value: BG.draft, autocomplete: 'off',
+      oninput: function (ev) { BG.draft = fmt(ev.target.value); ev.target.value = BG.draft; hitung(); } });
+    hitung();
+    function simpan(mode, nilai) {
+      kirimData({ action: 'budgetSet', mode: mode, jenis: e.jenis, kategori: e.kategori, bulan: bulanAktif(), nilai: nilai },
+        function () { BG.edit = null; BG.msg = 'Tersimpan.'; BG.ok = true; loadBudget(); loadSisa(); toast('Budget tersimpan'); },
+        function (m) { BG.msg = m; BG.ok = false; renderBudget(); toast(m, true); });
+    }
+    box.append(
+      h('div', { style: 'font-weight:700', text: e.mode === 'default' ? 'Ubah default bulanan' : 'Ubah budget ' + label }),
+      h('div', { class: 'note', text: 'Kategori: ' + e.kategori }), inp, diff,
+      h('div', { class: 'note', text: e.mode === 'default' ? 'Berlaku untuk semua bulan yang belum diubah manual.' : 'Hanya bulan ini. Sisa di Ringkasan ikut berubah.' }),
+      h('button', { class: 'primary', type: 'button', style: 'padding:11px;font-size:14px', text: 'Simpan ke sheet Budget', onclick: function () { simpan(e.mode, Number(digits(BG.draft))); } }),
+      (e.mode === 'bulan' && e.override) ? h('button', { class: 'secondary', type: 'button', text: 'Kembalikan ke default (' + rp(e.def) + ')', onclick: function () { simpan('reset'); } }) : null,
+      h('button', { class: 'link', type: 'button', text: 'Batal', onclick: function () { BG.edit = null; renderBudget(); } }),
+      panelPesan(BG.msg, BG.ok));
+    return box;
+  }
+
+  // ---------- Aset ----------
+  var AS = { res: null, loading: false, err: '', msg: '', ok: true, sending: false, form: { tanggal: today(), nama: '', jenis: '', tujuan: '', nilai: '' } };
+  function loadAset() { return muat(AS, { action: 'aset' }, renderAset); }
+  function renderAset() {
+    var root = $('#view-data'); root.textContent = '';
+    root.append(barAtas('Aset'));
+    if (AS.err) root.append(h('div', { class: 'err', text: AS.err }));
+    var rows = (AS.res && AS.res.baris) || [];
+    var daftar = AS.loading && !AS.res ? h('div', { class: 'note', text: 'Memuat...' })
+      : !rows.length ? h('div', { class: 'card note', text: 'Belum ada snapshot aset.' })
+      : tabel([
+          { t: 'Tanggal', f: function (x) { return x.tanggal; } }, { t: 'Nama akun/aset', f: function (x) { return x.nama; } },
+          { t: 'Jenis', f: function (x) { return h('span', { class: 'badge' }, h('i', { class: 'dot', style: 'background:' + warnaJenisAset(x.jenis) }), x.jenis); } },
+          { t: 'Tujuan', f: function (x) { return x.tujuan || '–'; } }, { t: 'Nilai', r: true, f: function (x) { return rp(x.nilai); } }], rows);
+    var F = AS.form;
+    var namaLama = []; rows.forEach(function (x) { if (namaLama.indexOf(x.nama) < 0) namaLama.push(x.nama); });
+    var form = h('div', { class: 'card stack', style: 'gap:12px' },
+      h('div', { style: 'font-weight:700', text: 'Tambah snapshot' }),
+      h('div', {}, h('label', { class: 'lbl', for: 'asTgl', text: 'Tanggal snapshot' }), h('input', { class: 'field', id: 'asTgl', type: 'date', value: F.tanggal, oninput: function (e) { F.tanggal = e.target.value; } })),
+      h('div', {}, h('label', { class: 'lbl', for: 'asNama', text: 'Nama akun/aset' }), h('input', { class: 'field', id: 'asNama', type: 'text', list: 'dlNama', value: F.nama, placeholder: 'Contoh: Tabungan Mandiri', autocomplete: 'off', oninput: function (e) { F.nama = e.target.value; },
+        onchange: function (e) { F.nama = e.target.value; var nm = F.nama.trim().toLowerCase(); var m = rows.filter(function (x) { return x.nama.toLowerCase() === nm; })[0]; if (m) { F.jenis = m.jenis; F.tujuan = m.tujuan || ''; renderAset(); } } }),
+        h('datalist', { id: 'dlNama' }, namaLama.map(function (n) { return h('option', { value: n }); }))),
+      h('div', {}, h('label', { class: 'lbl', for: 'asJenis', text: 'Jenis' }), h('select', { class: 'field', id: 'asJenis', onchange: function (e) { F.jenis = e.target.value; } },
+        [h('option', { value: '', text: 'Pilih jenis' })].concat(data.jenisAset.map(function (j) { return h('option', { value: j, text: j, selected: j === F.jenis }); })))),
+      h('div', {}, h('label', { class: 'lbl', for: 'asTuj', text: 'Tujuan (opsional)' }), h('select', { class: 'field', id: 'asTuj', onchange: function (e) { F.tujuan = e.target.value; } },
+        [h('option', { value: '', text: 'Tanpa tujuan' })].concat(data.tujuan.map(function (j) { return h('option', { value: j, text: j, selected: j === F.tujuan }); })))),
+      h('div', {}, h('label', { class: 'lbl', for: 'asNilai', text: 'Nilai' }), h('input', { class: 'field', id: 'asNilai', type: 'text', inputmode: 'numeric', value: F.nilai, placeholder: '0', autocomplete: 'off', oninput: function (e) { F.nilai = fmt(e.target.value); e.target.value = F.nilai; } })),
+      h('div', { class: 'note', text: 'Satu snapshot per akun per bulan. Jika nama dan bulannya sama dengan yang sudah ada, barisnya diperbarui, bukan digandakan, dan Tujuan yang dikosongkan tetap memakai tujuan lama. Utang ditulis positif dengan jenis Utang.' }),
+      h('button', { class: 'primary', type: 'button', style: 'padding:11px;font-size:14px', disabled: AS.sending, text: 'Simpan snapshot', onclick: simpanAset }),
+      panelPesan(AS.msg, AS.ok));
+    root.append(h('div', { class: 'split' }, daftar, form));
+  }
+  function simpanAset() {
+    var F = AS.form;
+    if (AS.sending) return;
+    if (!F.tanggal || !F.nama.trim() || !F.jenis || F.nilai === '') { AS.msg = 'Isi tanggal, nama, jenis, dan nilai.'; AS.ok = false; renderAset(); return; }
+    AS.sending = true; renderAset();
+    kirimData({ action: 'asetTambah', tanggal: F.tanggal, nama: F.nama.trim(), jenis: F.jenis, tujuan: F.tujuan, nilai: Number(digits(F.nilai)) },
+      function (r) { AS.sending = false; AS.msg = r.diperbarui ? 'Snapshot diperbarui.' : 'Snapshot ditambahkan.'; AS.ok = true; F.nama = ''; F.nilai = ''; toast(AS.msg); loadAset(); },
+      function (m) { AS.sending = false; AS.msg = m; AS.ok = false; renderAset(); toast(m, true); });
+  }
+
+  // ---------- Kekayaan ----------
+  var KK = { res: null, loading: false, err: '' };
+  var TJ = { res: null, err: '' };
+  function loadTujuan() {
+    return apiGet({ action: 'tujuan' }).then(function (r) {
+      if (r && r.ok) { TJ.res = r; TJ.err = ''; } else { TJ.res = null; TJ.err = (r && r.error) || 'Gagal memuat tujuan.'; }
+    }).catch(function () { TJ.res = null; TJ.err = 'Tidak bisa terhubung.'; }).then(function () {
+      if (page === 'Kekayaan') renderKekayaan();
+      if (page === 'Setelan') renderSetelan();
+    });
+  }
+  function loadKekayaan() {
+    loadTujuan();
+    apiGet({ action: 'aset' }).then(function (r) { AS_TJ = (r && r.ok) ? r.baris : null; if (page === 'Kekayaan') renderKekayaan(); }).catch(function () { AS_TJ = null; });
+    return muat(KK, { action: 'kekayaan' }, renderKekayaan);
+  }
+  var AS_TJ = null;   // snapshot Aset untuk rincian jenis per tujuan (independen dari state halaman Aset)
+  // warna tetap per jenis aset (jarak antar warna sudah diperiksa agar mudah dibedakan)
+  var PALET = { 'Bank Mandiri': '#0071e3', 'Bank BCA': '#00b5ad', 'Saham': '#af52de', 'Bibit Pernikahan': '#ff6fb1', 'Bibit Pribadi': '#5856d6', 'Emas': '#d4af37', 'Lainnya': '#8e8e93', 'Obligasi': '#8b5e3c', 'Utang': '#ff9f0a' };
+  var CADANGAN = ['#9bcf27', '#64d2ff', '#bf5af2', '#ff453a', '#30d158'];
+  function warnaJenisAset(nama) {
+    if (PALET[nama]) return PALET[nama];
+    var hash = 0; String(nama).split('').forEach(function (c) { hash = (hash * 31 + c.charCodeAt(0)) % 9973; });
+    return CADANGAN[hash % CADANGAN.length];
+  }
+  function blokKomposisi(hd, iB) {
+    var box = h('div', { class: 'card', id: 'blokKomposisi' }, h('div', { style: 'font-weight:700;font-size:15px', text: 'Komposisi aset' }));
+    var nama = (data.jenisAset || []).filter(function (j) { return j !== 'Utang'; });
+    var idx = nama.map(function (j) { return hd.indexOf(j); });
+    var baris = null;
+    for (var i = KK.res.baris.length - 1; i >= 0 && !baris; i--) {
+      var r = KK.res.baris[i], tot = 0;
+      idx.forEach(function (k) { if (k >= 0 && typeof r[k] === 'number') tot += r[k]; });
+      if (tot > 0) baris = r;
+    }
+    if (!baris) { box.append(h('div', { class: 'note', style: 'margin-top:6px', text: 'Belum ada rincian aset per jenis.' })); return box; }
+    var item = [], total = 0;
+    nama.forEach(function (n, j) {
+      var v = idx[j] >= 0 && typeof baris[idx[j]] === 'number' ? baris[idx[j]] : 0;
+      if (v > 0) { total += v; item.push({ nama: n, v: v, warna: warnaJenisAset(n) }); }
+    });
+    box.append(h('div', { class: 'note', text: String(baris[iB]).replace(' (posisi awal)', '') }),
+      h('div', { class: 'komposisi', role: 'img', 'aria-label': 'Komposisi aset per jenis' }, item.map(function (it) { return h('i', { style: 'width:' + (it.v / total * 100) + '%;background:' + it.warna, title: it.nama }); })));
+    item.forEach(function (it) {
+      box.append(h('div', { class: 'lgd' }, h('span', {}, h('i', { class: 'dot', style: 'background:' + it.warna }), it.nama),
+        h('span', {}, h('b', { style: 'font-weight:600', text: rp(it.v) }), h('em', { text: persenTeks(it.v / total) }))));
+    });
+    return box;
+  }
+  function persenTeks(x) { return (x * 100).toFixed(1).replace('.', ',') + '%'; }
+  // warna per tujuan (tujuan baru mendapat warna cadangan berdasarkan namanya)
+  var PALET_TUJUAN = { 'Tabungan Pernikahan': '#ff6fb1', 'Investasi Masa Depan': '#af52de', 'Investasi Menengah': '#00b5ad', 'Dana Darurat': '#5856d6', 'Cash on Hand': '#d4af37', 'Pernikahan': '#ff6fb1', 'Dana Masa Depan': '#af52de' };
+  var CAD_TUJUAN = ['#00b5ad', '#8b5e3c', '#0071e3', '#8e8e93', '#9bcf27', '#64d2ff'];
+  function warnaTujuan(nama) {
+    if (PALET_TUJUAN[nama]) return PALET_TUJUAN[nama];
+    var hash = 0; String(nama).split('').forEach(function (c) { hash = (hash * 31 + c.charCodeAt(0)) % 9973; });
+    return CAD_TUJUAN[hash % CAD_TUJUAN.length];
+  }
+  function hexRgb(hex) { return [1, 3, 5].map(function (i) { return parseInt(hex.slice(i, i + 2), 16); }); }
+  function rgbaHex(hex, a) { return 'rgba(' + hexRgb(hex).join(',') + ',' + a + ')'; }
+  function gelapkan(hex, f) { return 'rgb(' + hexRgb(hex).map(function (v) { return Math.round(v * f); }).join(',') + ')'; }
+  // rincian jenis aset dalam satu tujuan, untuk bulan acuan yang sama dengan kartu Progres tujuan
+  // rinc: jumlah tiap jenis aset untuk satu tujuan, dari snapshot Aset (bulan yang sama dengan bulan acuan tujuan).
+  // nilaiGoal = total tujuan itu (dari Tujuan!D, sudah benar termasuk perhitungan khusus Bibit Pernikahan berbasis
+  // setoran). Bila tujuan itu punya baris Aset berjenis Bibit Pernikahan, nilainya DIGANTI dengan sisa dari
+  // nilaiGoal dikurangi jenis lain, supaya totalnya selalu cocok dengan angka besar di kartu (tidak dihitung dari
+  // snapshot mentah, yang belum termasuk setoran sesudahnya).
+  function rincianJenis(namaTujuan, nilaiGoal) {
+    // dibatasi ke rentang bulan acuan yang sama dengan yang dipakai sheet Tujuan (awalAcuan s.d. akhirAcuan,
+    // tidak termasuk akhirAcuan). Endpoint 'aset' mengirim SELURUH riwayat tanpa filter bulan, jadi penyaringan
+    // ini wajib di sini; tanpanya, snapshot dari bulan-bulan lama ikut terjumlah bersama bulan acuan sekarang.
+    var awal = TJ.res && TJ.res.awalAcuan, akhir = TJ.res && TJ.res.akhirAcuan;
+    var item = {};
+    (AS_TJ || []).forEach(function (a) {
+      if (a.tujuan !== namaTujuan || a.jenis === 'Utang') return;
+      if (awal && akhir && !(a.tanggal >= awal && a.tanggal < akhir)) return;
+      item[a.jenis] = (item[a.jenis] || 0) + a.nilai;
+    });
+    if (Object.prototype.hasOwnProperty.call(item, 'Bibit Pernikahan')) {
+      var lain = 0; Object.keys(item).forEach(function (k) { if (k !== 'Bibit Pernikahan') lain += item[k]; });
+      var sisa = nilaiGoal - lain;
+      if (sisa > 0) item['Bibit Pernikahan'] = sisa; else delete item['Bibit Pernikahan'];
+    }
+    var total = 0; Object.keys(item).forEach(function (k) { total += item[k]; });
+    var list = Object.keys(item).filter(function (k) { return item[k] > 0; }).map(function (k) { return { nama: k, v: item[k], warna: warnaJenisAset(k) }; });
+    return { list: list, total: total };
+  }
+  function donutJenis(rinc) {
+    // svg/circle WAJIB lewat svgEl (createElementNS) supaya browser merender sebagai grafik, bukan elemen HTML kosong.
+    var R = 15.5, K = 2 * Math.PI * R, off = 0;
+    var svg = svgEl('svg', { viewBox: '0 0 40 40', width: '52', height: '52', role: 'img', 'aria-label': 'Rincian jenis aset' });
+    if (!rinc.list.length) {
+      // kolom kanan selalu dicadangkan (walau belum ada data), supaya lebar judul sama di semua kartu
+      svg.append(svgEl('circle', { cx: '20', cy: '20', r: String(R), fill: 'none', stroke: 'var(--faint)', 'stroke-width': '7', 'stroke-dasharray': '3 4', 'stroke-linecap': 'round' }));
+      return h('div', { class: 'tujuan-rinc' }, svg, h('div', { class: 'note', style: 'margin-top:6px;font-size:10px', text: 'Belum ada data' }));
+    }
+    // satu jenis pun tetap digambar (lingkaran penuh satu warna), supaya kolom kanan selalu sejajar antar kartu
+    rinc.list.forEach(function (it) {
+      var frac = it.v / rinc.total, len = rinc.list.length === 1 ? K : frac * K;
+      svg.append(svgEl('circle', { cx: '20', cy: '20', r: String(R), fill: 'none', stroke: it.warna, 'stroke-width': '7',
+        'stroke-dasharray': len.toFixed(1) + ' ' + (K - len).toFixed(1), 'stroke-dashoffset': (-off).toFixed(1), transform: 'rotate(-90 20 20)' }));
+      off += len;
+    });
+    return h('div', { class: 'tujuan-rinc' }, svg, h('div', { class: 'ket' }, rinc.list.slice(0, 3).map(function (it) {
+      var persen = Math.round(it.v / rinc.total * 100);
+      return h('span', { title: it.nama + ' \u00b7 ' + persen + '%' }, h('i', { class: 'dot', style: 'background:' + it.warna }), h('b', { style: 'font-weight:400;overflow:hidden;text-overflow:ellipsis', text: it.nama }));
+    }), rinc.list.length > 3 ? h('span', { style: 'color:var(--faint)', text: '+' + (rinc.list.length - 3) + ' lagi' }) : null));
+  }
+  function blokTujuan() {
+    var box = h('div', { class: 'stack', style: 'gap:12px', id: 'blokTujuan' }, h('div', { style: 'font-weight:700;font-size:15px', text: 'Progres tujuan' }));
+    if (TJ.err) { box.append(h('div', { class: 'note', text: TJ.err })); return box; }
+    if (!TJ.res) { box.append(h('div', { class: 'note', text: 'Memuat...' })); return box; }
+    var r = TJ.res;
+    var grid = h('div', { style: 'display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px' });
+    r.baris.forEach(function (x) {
+      var ada = typeof x.target === 'number' && x.target > 0;
+      var pct = ada && typeof x.progres === 'number' ? Math.min(100, Math.max(0, Math.round(x.progres * 1000) / 10)) : 0;
+      var rinc = rincianJenis(x.nama, x.nilai);
+      var kartu = h('div', { class: 'card tujuan-kartu', style: 'padding:16px 18px;--tc:' + warnaTujuan(x.nama) + ';--tt:' + rgbaHex(warnaTujuan(x.nama), 0.12) + ';--tt2:' + rgbaHex(warnaTujuan(x.nama), 0.24) + ';--td:' + gelapkan(warnaTujuan(x.nama), 0.62) },
+        h('div', { class: 'tujuan-body' },
+          h('div', { class: 'tujuan-info' },
+            h('div', { style: 'display:flex;justify-content:space-between;gap:8px' }, h('span', { style: 'font-weight:600', text: x.nama })),
+            h('div', { style: "font-size:20px;font-weight:600;letter-spacing:-.02em;margin-top:6px;font-variant-numeric:tabular-nums", text: rp(x.nilai) }),
+            ada ? h('div', { class: 'note', text: 'dari ' + rp(x.target) + (x.tanggalTarget ? ' \u00b7 target ' + x.tanggalTarget : '') }) : h('div', { class: 'note', text: 'Target belum diisi' }),
+            ada ? h('div', { class: 'bar' }, h('i', { style: 'width:' + pct + '%' })) : null,
+            ada ? h('div', { class: 'note', style: 'margin-top:6px' }, typeof x.progres === 'number' ? h('b', { class: 'pct', text: persenTeks(x.progres) }) : null, (typeof x.progres === 'number' ? ' \u00b7 ' : '') + 'sisa ' + rp(x.sisa || 0) +
+              (x.perlu === 'lewat' ? ' \u00b7 tanggal target sudah lewat' : (typeof x.perlu === 'number' ? ' \u00b7 perlu ' + rp(x.perlu) + ' per bulan' : ''))) : null),
+          donutJenis(rinc)));
+      grid.append(kartu);      grid.append(kartu);
+    });
+    box.append(grid, h('div', { class: 'note', text: 'Bulan acuan: ' + r.bulanAcuan + '. Tanpa tujuan: ' + rp(r.tanpaTujuan) + '. Target diatur di Setelan, tab Tujuan aset. Rincian jenis aset memakai snapshot bulan acuan yang sama.' }));
+    return box;
+  }
+  function renderKekayaan() {
+    var root = $('#view-data'); root.textContent = '';
+    root.append(barAtas('Kekayaan'));
+    if (KK.err) root.append(h('div', { class: 'err', text: KK.err }));
+    if (KK.loading && !KK.res) { root.append(h('div', { class: 'note', text: 'Memuat...' })); return; }
+    if (!KK.res) return;
+    var hd = KK.res.header, ci = function (n) { return hd.indexOf(n); };
+    var iB = ci('Bulan'), iA = ci('Total Aset'), iU = ci('Total Utang'), iN = ci('Kekayaan Bersih'), iP = ci('Perubahan kekayaan bersih vs bulan sebelumnya');
+    var rows = KK.res.baris.filter(function (r) { return typeof r[iN] === 'number' && r[iN] !== 0; });
+    var akhir = rows.length ? rows[rows.length - 1] : null;
+    function kartu(j, v, k, cls, tint) { return h('div', { class: 'card kartu ' + (tint || '') }, h('div', { class: 'note', text: j }), h('div', { class: 'v ' + (cls || ''), text: v }), h('div', { class: 'note', text: k || '' })); }
+    root.append(h('div', { style: 'display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px' },
+      kartu('Kekayaan bersih terakhir', akhir ? rp(akhir[iN]) : '–', akhir ? String(akhir[iB]) : 'Belum ada snapshot aset'),
+      kartu('Perubahan dari bulan sebelumnya', akhir && typeof akhir[iP] === 'number' ? (akhir[iP] >= 0 ? '+' : '') + rp(akhir[iP]) : '–', 'Muncul setelah dua bulan punya snapshot', akhir && typeof akhir[iP] === 'number' ? (akhir[iP] >= 0 ? 'pos' : 'neg') : '', akhir && typeof akhir[iP] === 'number' ? (akhir[iP] >= 0 ? 'tint-g' : 'tint-r') : ''),
+      kartu('Total utang', akhir ? angkaOr(akhir[iU]) : '–', akhir ? String(akhir[iB]) : '', '', akhir && typeof akhir[iU] === 'number' && akhir[iU] > 0 ? 'tint-o' : '')));
+    root.append(blokKomposisi(hd, iB));
+    root.append(blokTujuan());
+    // grafik garis kekayaan bersih
+    var grafik = h('div', { class: 'card' }, h('div', { style: 'font-weight:700;margin-bottom:10px', text: 'Tren kekayaan bersih' }));
+    if (rows.length < 2) grafik.append(h('div', { class: 'note', text: 'Grafik muncul setelah ada minimal dua bulan snapshot.' }));
+    else {
+      var W = 1000, H = 160, PAD = 40, nilai = rows.map(function (r) { return r[iN]; });
+      var mn = Math.min.apply(null, nilai), mx = Math.max.apply(null, nilai), rg = (mx - mn) || 1;
+      var pts = rows.map(function (r, i) { return [PAD + i * ((W - 2 * PAD) / (rows.length - 1)), H - 40 - ((r[iN] - mn) / rg) * (H - 80)]; });
+      var svg = svgEl('svg', { viewBox: '0 0 ' + W + ' ' + H, style: 'width:100%;height:150px', role: 'img', 'aria-label': 'Grafik tren kekayaan bersih' },
+        svgEl('polyline', { points: pts.map(function (p) { return p.join(','); }).join(' '), fill: 'none', stroke: '#0071e3', 'stroke-width': '4', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }));
+      pts.forEach(function (p, i) {
+        svg.append(svgEl('circle', { cx: p[0], cy: p[1], r: '5', fill: '#0071e3' }));
+        var t = svgEl('text', { x: p[0], y: H - 8, 'font-size': '13', fill: '#86868b', 'text-anchor': 'middle' }); t.textContent = String(rows[i][iB]).replace(' (posisi awal)', ''); svg.append(t);
+      });
+      grafik.append(svg);
+    }
+    root.append(grafik);
+    var LEWAT = ['No', 'Awal', 'Akhir'];
+    var JUDUL = { 'Perubahan kekayaan bersih vs bulan sebelumnya': 'Perubahan', 'Nilai pasar Pernikahan': 'Dana Pernikahan (nilai pasar)', 'Selisih': 'Selisih vs setoran' };
+    var kol = [];
+    hd.forEach(function (nama, i) {
+      if (!nama || LEWAT.indexOf(nama) >= 0) return;
+      var t = JUDUL[nama] || nama;
+      if (i === iB) kol.push({ t: t, f: function (r) { return r[i]; } });
+      else if (i === iN) kol.push({ t: t, r: true, f: function (r) { return h('strong', { text: angkaOr(r[i]) }); } });
+      else if (i === iP) kol.push({ t: t, r: true, kelas: function (r) { return typeof r[i] === 'number' ? (r[i] >= 0 ? 'pos' : 'neg') : ''; },
+        f: function (r) { return typeof r[i] === 'number' ? (r[i] >= 0 ? '+' : '') + rp(r[i]) : '–'; } });
+      else kol.push({ t: t, r: true, dot: (data.jenisAset || []).indexOf(nama) >= 0 ? warnaJenisAset(nama) : null, f: function (r) { return angkaOr(r[i]); } });
+    });
+    root.append(tabel(kol, KK.res.baris, { kelasTabel: 'lebar' }), h('div', { class: 'note', text: 'Dibaca dari sheet Kekayaan. Angka bulan yang belum punya snapshot Aset tampil "–".' }));
+  }
+
+  // ---------- Saham ----------
+  var SH = { res: null, loading: false, err: '' };
+  function loadSaham() { return muat(SH, { action: 'saham' }, renderSaham2); }
+  var SN = { tanggal: today(), sending: false, msg: '', ok: true };
+  function blokSnapshotManual() {
+    var box = h('div', { class: 'card stack', style: 'gap:10px' },
+      h('div', { style: 'font-weight:700;font-size:15px', text: 'Snapshot manual' }),
+      h('div', { class: 'note', text: 'Pemicu otomatis hanya berjalan tanggal 1-3 tiap bulan. Dipakai di sini untuk memperbarui sekarang, tanpa menunggu jadwal itu.' }),
+      h('div', { class: 'row2' },
+        h('div', {}, h('label', { class: 'lbl', for: 'snTgl', text: 'Tanggal snapshot' }),
+          h('input', { class: 'field', id: 'snTgl', type: 'date', value: SN.tanggal, oninput: function (e) { SN.tanggal = e.target.value; } })),
+        h('div', { style: 'display:flex;align-items:flex-end' },
+          h('button', { class: 'primary', type: 'button', style: 'padding:11px;font-size:14px', disabled: SN.sending, text: SN.sending ? 'Memproses...' : 'Perbarui sekarang', onclick: jalankanSnapshot }))),
+      panelPesan(SN.msg, SN.ok));
+    return box;
+  }
+  function jalankanSnapshot() {
+    if (SN.sending || !SN.tanggal) return;
+    SN.sending = true; SN.msg = ''; renderSaham2();
+    kirimData({ action: 'snapshotSaham', tanggal: SN.tanggal, timpa: true },
+      function (r) { SN.sending = false; SN.msg = r.pesan; SN.ok = true; toast(r.pesan); loadSaham(); },
+      function (m) { SN.sending = false; SN.msg = m; SN.ok = false; renderSaham2(); toast(m, true); });
+  }
+  function renderSaham2() {
+    var root = $('#view-data'); root.textContent = '';
+    root.append(barAtas('Portofolio Saham'));
+    root.append(blokSnapshotManual());
+    if (SH.err) root.append(h('div', { class: 'err', text: SH.err }));
+    if (SH.loading && !SH.res) { root.append(h('div', { class: 'note', text: 'Memuat...' })); return; }
+    if (!SH.res) return;
+    var t = SH.res.total;
+    function kartu(j, v, cls) { return h('div', { class: 'card kartu ' + (cls === 'pos' ? 'tint-g' : (cls === 'neg' ? 'tint-r' : '')) }, h('div', { class: 'note', text: j }), h('div', { class: 'v ' + (cls || ''), text: v })); }
+    var urTeks = typeof t.ur === 'number' ? (t.ur >= 0 ? '+' : '') + rp(t.ur) + (typeof t.urPct === 'number' ? ' (' + pct(t.urPct) + ')' : '') : '–';
+    root.append(h('div', { style: 'display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px' },
+      kartu('Modal', angkaOr(t.modal)), kartu('Nilai pasar', angkaOr(t.pasar)), kartu('Untung/rugi', urTeks, typeof t.ur === 'number' ? (t.ur >= 0 ? 'pos' : 'neg') : '')));
+    root.append(tabel([
+      { t: 'Kode', f: function (x) { return h('strong', { text: x.kode }); } },
+      { t: 'Lembar', r: true, f: function (x) { return typeof x.lembar === 'number' ? x.lembar.toLocaleString('id-ID') : '–'; } },
+      { t: 'Harga rata-rata', r: true, f: function (x) { return angkaOr(x.rata); } },
+      { t: 'Modal', r: true, f: function (x) { return angkaOr(x.modal); } },
+      { t: 'Harga sekarang', r: true, f: function (x) { return angkaOr(x.sekarang); } },
+      { t: 'Nilai pasar', r: true, f: function (x) { return angkaOr(x.pasar); } },
+      { t: 'Untung/rugi', r: true, kelas: function (x) { return typeof x.ur === 'number' ? (x.ur >= 0 ? 'pos' : 'neg') : ''; },
+        f: function (x) { return typeof x.ur === 'number' ? (x.ur >= 0 ? '+' : '') + rp(x.ur) + (typeof x.urPct === 'number' ? ' (' + pct(x.urPct) + ')' : '') : '–'; } },
+      { t: 'Bobot', r: true, f: function (x) { return typeof x.bobot === 'number' ? (x.bobot * 100).toFixed(1).replace('.', ',') + '%' : '–'; } },
+      { t: 'Terealisasi', r: true, kelas: function (x) { return typeof x.real === 'number' && x.real !== 0 ? (x.real >= 0 ? 'pos' : 'neg') : ''; },
+        f: function (x) { return typeof x.real === 'number' && x.real !== 0 ? (x.real >= 0 ? '+' : '') + rp(x.real) : '–'; } }
+    ], SH.res.baris), h('div', { class: 'note', text: 'Harga dari GOOGLEFINANCE, bisa tertunda dari harga bursa. Untuk mencatat beli/jual, gunakan form di sebelah kanan.' }));
+  }
+
+  // ---------- Setelan ----------
+  var ST = { tab: 'Rekening', nama: '', ket: '', msg: '', ok: true, sending: false };
+  var SLOT = { rekening: 9, tujuan: 7, emiten: 8 };
+  function refreshInit() {
+    return apiGet({ action: 'init' }).then(function (r) { if (r && r.ok) { data = r; renderCatat(); renderSetelan(); loadTujuan(); } });
+  }
+  function renderSetelan() {
+    var root = $('#view-data'); root.textContent = '';
+    root.append(barAtas('Setelan'));
+    root.append(h('div', { class: 'chips' }, ['Rekening', 'Tujuan aset', 'Kode saham', 'Kategori'].map(function (t) {
+      return h('button', { type: 'button', class: 'chip', 'aria-pressed': String(t === ST.tab), text: t, onclick: function () { ST.tab = t; ST.nama = ''; ST.ket = ''; ST.msg = ''; renderSetelan(); } });
+    })));
+    var tab = ST.tab, isKat = tab === 'Kategori';
+    var semua = data.kategoriSemua || {};   // jaga-jaga bila Jembatan belum diperbarui
+    JENIS.forEach(function (j) { if (!semua[j]) semua[j] = (data.kategori[j] || []).map(function (n) { return { nama: n, hidden: false }; }); });
+    var daftar, slotInfo = '', tipe = null, labelNama = '', ph = '', labelKet = '', phKet = '', catat = '';
+    if (tab === 'Rekening') { tipe = 'rekening'; daftar = data.rekening.map(function (r) { return { nama: r.nama, ket: r.peran }; }); slotInfo = daftar.length + ' dari ' + SLOT.rekening + ' slot terpakai'; labelNama = 'Nama rekening'; ph = 'Contoh: GoPay'; labelKet = 'Peran (opsional)'; phKet = 'Contoh: e-wallet'; catat = 'Rekening baru langsung muncul di pilihan saat mencatat transaksi.'; }
+    if (tab === 'Tujuan aset') { tipe = 'tujuan'; daftar = data.tujuan.map(function (n) { return { nama: n, ket: '' }; }); slotInfo = daftar.length + ' dari ' + SLOT.tujuan + ' slot terpakai'; labelNama = 'Nama tujuan'; ph = 'Contoh: Dana liburan'; catat = 'Dipakai di kolom Tujuan pada snapshot aset.'; }
+    if (tab === 'Kode saham') { tipe = 'emiten'; daftar = data.emiten.map(function (n) { return { nama: n, ket: '' }; }); slotInfo = daftar.length + ' dari ' + SLOT.emiten + ' slot terpakai'; labelNama = 'Kode emiten'; ph = 'Contoh: BBCA'; catat = 'Tanpa awalan IDX. Kode yang tidak dikenali GOOGLEFINANCE tampil "tidak tersedia" di Portofolio.'; }
+
+    var kiri = h('div', { class: 'card stack', style: 'gap:8px' }, h('div', { style: 'font-weight:700', text: tab }));
+    if (isKat) {
+      JENIS.forEach(function (j) {
+        kiri.append(h('div', { class: 'note', style: 'margin-top:8px;font-weight:700;text-transform:uppercase;letter-spacing:.04em', text: j }));
+        (semua[j] || []).forEach(function (k) {
+          kiri.append(h('div', { style: 'display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--soft)' },
+            h('span', { style: k.hidden ? 'color:#86868b;text-decoration:line-through' : 'font-weight:600', text: k.nama }),
+            k.hidden ? h('span', { class: 'note', style: 'font-size:12px', text: 'Disembunyikan' }) : null,
+            h('button', { type: 'button', class: 'secondary', style: 'margin-left:auto;padding:6px 12px;font-size:12px', text: k.hidden ? 'Tampilkan' : 'Sembunyikan', onclick: function () { sembunyi(k); } })));
+        });
+      });
+      kiri.append(h('div', { class: 'note', style: 'margin-top:8px', text: 'Kategori yang disembunyikan tidak muncul di pilihan saat mencatat, tapi riwayat dan budgetnya tetap ada. Menambah kategori baru belum tersedia dari aplikasi karena butuh slot cadangan di sheet.' }));
+    } else if (tab === 'Tujuan aset') {
+      kiri.append(h('div', { class: 'note', text: slotInfo }));
+      if (!TJ.res) {
+        daftar.forEach(function (d) { kiri.append(h('div', { style: 'padding:8px 0;border-bottom:1px solid var(--soft);font-weight:600', text: d.nama })); });
+        kiri.append(h('div', { class: 'note', style: 'margin-top:8px', text: TJ.err ? TJ.err : 'Memuat target...' }));
+      } else {
+        TJ.res.baris.forEach(function (x) {
+          var inT = h('input', { class: 'sm', type: 'text', inputmode: 'numeric', placeholder: 'Target (Rp)', 'aria-label': 'Target ' + x.nama, value: typeof x.target === 'number' ? fmt(String(x.target)) : '', autocomplete: 'off', style: 'width:150px', oninput: function (e) { e.target.value = fmt(e.target.value); } });
+          var inD = h('input', { class: 'sm', type: 'date', 'aria-label': 'Tanggal target ' + x.nama, value: x.tanggalTarget || '' });
+          kiri.append(h('div', { style: 'display:flex;align-items:center;flex-wrap:wrap;gap:8px;padding:8px 0;border-bottom:1px solid var(--soft)' },
+            h('span', { style: 'font-weight:600;min-width:130px', text: x.nama }), inT, inD,
+            h('button', { type: 'button', class: 'secondary', style: 'padding:8px 12px;font-size:12px', text: 'Simpan', onclick: function () {
+              kirimData({ action: 'tujuanSet', nama: x.nama, target: inT.value === '' ? '' : Number(digits(inT.value)), tanggal: inD.value },
+                function () { ST.msg = 'Target ' + x.nama + ' tersimpan.'; ST.ok = true; loadTujuan(); toast('Target tersimpan'); },
+                function (m) { ST.msg = m; ST.ok = false; renderSetelan(); toast(m, true); });
+            } })));
+        });
+        var katSetoran = (data.kategoriSemua['Tabungan & Investasi'] || []).map(function (k) { return k.nama; });
+        var selSaham = h('select', { class: 'sm', 'aria-label': 'Tujuan untuk saham', onchange: function (e) {
+          var pilih = e.target.value;
+          kirimData({ action: 'tujuanSet', tujuanSaham: pilih },
+            function () { data.tujuanSaham = pilih; ST.msg = pilih ? 'Saham dihitung ke ' + pilih + '.' : 'Saham tidak dialokasikan.'; ST.ok = true; renderCatat(); loadTujuan(); },
+            function (m) { ST.msg = m; ST.ok = false; renderSetelan(); toast(m, true); });
+        } }, [h('option', { value: '', text: 'Tidak dialokasikan' })].concat(TJ.res.baris.filter(function (x) { return katSetoran.indexOf(x.nama) >= 0; }).map(function (x) { return h('option', { value: x.nama, text: x.nama, selected: x.nama === TJ.res.tujuanSaham }); })));
+        kiri.append(h('div', { style: 'margin-top:12px' }, h('div', { class: 'lbl', text: 'Tujuan untuk saham' }), selSaham,
+          h('div', { class: 'note', style: 'margin-top:6px', text: 'Baris Aset berjenis Saham yang Tujuannya kosong dihitung ke tujuan ini, dan pembelian saham dicatat sebagai setoran ke tujuan ini. Hanya tujuan yang juga menjadi kategori Tabungan & Investasi yang bisa dipilih (Cash on Hand diisi manual di Aset).' })));
+      }
+    } else {
+      kiri.append(h('div', { class: 'note', text: slotInfo }));
+      daftar.forEach(function (d) { kiri.append(h('div', { style: 'display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--soft)' }, h('span', { style: 'font-weight:600', text: d.nama }), h('span', { class: 'note', text: d.ket }))); });
+    }
+
+    var kanan = null;
+    if (!isKat) {
+      kanan = h('div', { class: 'card stack', style: 'gap:12px' },
+        h('div', { style: 'font-weight:700', text: 'Tambah ' + tab.toLowerCase() }),
+        h('div', {}, h('label', { class: 'lbl', for: 'stNama', text: labelNama }), h('input', { class: 'field', id: 'stNama', type: 'text', value: ST.nama, placeholder: ph, autocomplete: 'off', oninput: function (e) { ST.nama = e.target.value; } })),
+        labelKet ? h('div', {}, h('label', { class: 'lbl', for: 'stKet', text: labelKet }), h('input', { class: 'field', id: 'stKet', type: 'text', value: ST.ket, placeholder: phKet, autocomplete: 'off', oninput: function (e) { ST.ket = e.target.value; } })) : null,
+        h('div', { class: 'note', text: catat }),
+        h('button', { class: 'primary', type: 'button', style: 'padding:11px;font-size:14px', disabled: ST.sending, text: 'Tambah ke sheet', onclick: function () { tambahMaster(tipe); } }));
+    }
+    var pesan = panelPesan(ST.msg, ST.ok);
+    if (pesan) (kanan || kiri).append(pesan);
+    root.append(kanan ? h('div', { class: 'split' }, kiri, kanan) : kiri);
+  }
+  function tambahMaster(tipe) {
+    if (ST.sending) return;
+    if (!ST.nama.trim()) { ST.msg = 'Isi nama dulu.'; ST.ok = false; renderSetelan(); return; }
+    ST.sending = true; renderSetelan();
+    kirimData({ action: 'masterTambah', tipe: tipe, nama: ST.nama.trim(), ket: ST.ket.trim() },
+      function () { ST.sending = false; ST.msg = ST.nama.trim() + ' ditambahkan.'; ST.ok = true; ST.nama = ''; ST.ket = ''; refreshInit(); },
+      function (m) { ST.sending = false; ST.msg = m; ST.ok = false; renderSetelan(); toast(m, true); });
+  }
+  function sembunyi(k) {
+    kirimData({ action: 'kategoriSembunyi', nama: k.nama, sembunyi: !k.hidden },
+      function () { ST.msg = k.hidden ? k.nama + ' ditampilkan kembali.' : k.nama + ' disembunyikan dari pilihan.'; ST.ok = true; refreshInit(); },
+      function (m) { ST.msg = m; ST.ok = false; renderSetelan(); toast(m, true); });
+  }
+
+  // ---------- sidebar & halaman (layar lebar) ----------
+  var MENU = ['Ringkasan', 'Transaksi', 'Budget', 'Aset', 'Kekayaan', 'Saham', 'Setelan'];
+  var KELAS = { Ringkasan: 'pg-ringkasan', Transaksi: 'pg-datacatat', Saham: 'pg-datacatat', Budget: 'pg-dataonly', Aset: 'pg-dataonly', Kekayaan: 'pg-dataonly', Setelan: 'pg-dataonly' };
+  var MUAT = { Transaksi: loadTransaksi, Budget: loadBudget, Aset: loadAset, Kekayaan: loadKekayaan, Saham: loadSaham, Setelan: function () { loadTujuan(); renderSetelan(); } };
+  var page = 'Ringkasan';
+  function renderSide() {
+    var side = $('#side'); side.textContent = '';
+    side.append(h('div', { class: 'brand', text: 'Budget Tracker' }));
+    MENU.forEach(function (m) {
+      side.append(h('button', { type: 'button', 'aria-current': String(m === page), text: m, onclick: function () { setPage(m); } }));
+    });
+  }
+  function setPage(m) {
+    page = m;
+    var b = document.body;
+    ['pg-ringkasan', 'pg-datacatat', 'pg-dataonly'].forEach(function (c) { b.classList.remove(c); });
+    b.classList.add(KELAS[m]);
+    $('#judul').textContent = m === 'Ringkasan' ? 'Ringkasan Bulanan' : m;
+    renderSide();
+    if (!data) return;
+    if (m === 'Saham') { f.jenis = 'Tabungan & Investasi'; f.kategori = null; f.saham = true; f.rekening = null; renderCatat(); }
+    if (MUAT[m]) MUAT[m]();
+  }
+  function setBulan(n) {
+    BULAN = n; loadSisa();
+    if (page === 'Transaksi') loadTransaksi();
+    if (page === 'Budget') loadBudget();
+  }
+
+  // ---------- navigasi & boot ----------
+  function setView(v) {
+    view = v;
+    $('#view-catat').hidden = v !== 'catat'; $('#view-sisa').hidden = v !== 'sisa';
+    [].forEach.call(document.querySelectorAll('nav button'), function (b) { b.setAttribute('aria-current', String(b.getAttribute('data-v') === v)); });
+  }
+  [].forEach.call(document.querySelectorAll('nav button'), function (b) { b.addEventListener('click', function () { setView(b.getAttribute('data-v')); }); });
+  $('#btnKoneksi').addEventListener('click', function () { showSetup(''); });
+
+  function boot() {
+    if (!cfg || !cfg.url || !cfg.token) { showSetup(''); return; }
+    apiGet({ action: 'init' }).then(function (r) {
+      if (!r || !r.ok) { showSetup((r && r.error) || 'Gagal memuat data.'); return; }
+      data = r; $('#setup').hidden = true; $('#main').hidden = false; $('#nav').hidden = false;
+      setView(view); renderCatat(); loadSisa(); setPage(page);
+    }).catch(function () { showSetup('Tidak bisa terhubung. Periksa URL dan koneksi internet.'); });
+  }
+  renderSide();
+  boot();
+})();
+</script>
+</body>
+</html>
