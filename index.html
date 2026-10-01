@@ -709,20 +709,25 @@ main{padding-top:8px}
   // nilaiGoal dikurangi jenis lain, supaya totalnya selalu cocok dengan angka besar di kartu (tidak dihitung dari
   // snapshot mentah, yang belum termasuk setoran sesudahnya).
   function rincianJenis(namaTujuan, nilaiGoal) {
-    // dibatasi ke rentang bulan acuan yang sama dengan yang dipakai sheet Tujuan (awalAcuan s.d. akhirAcuan,
-    // tidak termasuk akhirAcuan). Endpoint 'aset' mengirim SELURUH riwayat tanpa filter bulan, jadi penyaringan
-    // ini wajib di sini; tanpanya, snapshot dari bulan-bulan lama ikut terjumlah bersama bulan acuan sekarang.
+    // Jenis BIASA (Bank, Saham, Bibit Pribadi, dsb) dibatasi ke rentang bulan acuan (awalAcuan s.d. akhirAcuan),
+    // supaya snapshot dari bulan-bulan lama tidak ikut terjumlah bersama bulan acuan sekarang (kasus Cash on Hand).
+    //
+    // Bibit Pernikahan DIKECUALIKAN dari batas itu: nilainya dihitung berbasis setoran (snapshot lama + setoran
+    // terbaru), jadi tetap berlaku di bulan ini walau baris Aset-nya sendiri bisa bertanggal bulan-bulan sebelumnya
+    // (tidak perlu snapshot baru tiap bulan). Yang menentukan "apakah tujuan ini punya Bibit Pernikahan" adalah
+    // keberadaan barisnya di riwayat Aset (tanpa syarat tanggal), bukan apakah barisnya jatuh di bulan acuan ini.
     var awal = TJ.res && TJ.res.awalAcuan, akhir = TJ.res && TJ.res.akhirAcuan;
-    var item = {};
+    var item = {}, adaBibitPernikahan = false;
     (AS_TJ || []).forEach(function (a) {
       if (a.tujuan !== namaTujuan || a.jenis === 'Utang') return;
+      if (a.jenis === 'Bibit Pernikahan') { adaBibitPernikahan = true; return; }   // ditangani terpisah di bawah
       if (awal && akhir && !(a.tanggal >= awal && a.tanggal < akhir)) return;
       item[a.jenis] = (item[a.jenis] || 0) + a.nilai;
     });
-    if (Object.prototype.hasOwnProperty.call(item, 'Bibit Pernikahan')) {
-      var lain = 0; Object.keys(item).forEach(function (k) { if (k !== 'Bibit Pernikahan') lain += item[k]; });
+    if (adaBibitPernikahan) {
+      var lain = 0; Object.keys(item).forEach(function (k) { lain += item[k]; });
       var sisa = nilaiGoal - lain;
-      if (sisa > 0) item['Bibit Pernikahan'] = sisa; else delete item['Bibit Pernikahan'];
+      if (sisa > 0) item['Bibit Pernikahan'] = sisa;
     }
     var total = 0; Object.keys(item).forEach(function (k) { total += item[k]; });
     var list = Object.keys(item).filter(function (k) { return item[k] > 0; }).map(function (k) { return { nama: k, v: item[k], warna: warnaJenisAset(k) }; });
